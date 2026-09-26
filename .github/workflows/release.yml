@@ -1,0 +1,104 @@
+name: Build
+
+# Vérifie le projet à chaque push et à chaque PR, construit l'exécutable Windows
+# et le publie dans une Release GitHub lorsque le push porte un tag `v*`
+# (ex. `git tag v1.0.0 && git push origin v1.0.0`).
+on:
+  push:
+    branches: [main, master]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+# Principe du moindre privilège : lecture seule par défaut, l'écriture n'est
+# accordée qu'au job qui publie la Release.
+permissions:
+  contents: read
+
+# Un seul build par branche ou par tag : un nouveau push annule le build
+# précédent encore en cours.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verifier:
+    name: Tests et analyse statique
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Installer le projet
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[gui,dev]"
+
+      - name: Analyse statique
+        run: python -m pyflakes .
+
+      - name: Tests
+        run: python -m pytest -q
+        env:
+          QT_QPA_PLATFORM: offscreen
+
+  executable:
+    name: Exécutable Windows
+    needs: verifier
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Installer PyInstaller
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[build]"
+          pip install PySide6
+
+      - name: Construire l'exécutable
+        run: pyinstaller spec/force_sismique.spec --noconfirm
+
+      - name: Vérifier que l'exécutable démarre
+        shell: pwsh
+        run: |
+          $env:QT_QPA_PLATFORM = "offscreen"
+          $process = Start-Process dist/ForceSismiqueRPS2011.exe -PassThru
+          Start-Sleep -Seconds 20
+          if ($process.HasExited) {
+            throw "L'exécutable s'est arrêté au démarrage (code $($process.ExitCode))."
+          }
+          Stop-Process -Id $process.Id
+          "Exécutable démarré et boucle d'événements active."
+
+      - name: Somme de contrôle SHA-256
+        shell: pwsh
+        run: |
+          $hachage = (Get-FileHash dist/ForceSismiqueRPS2011.exe -Algorithm SHA256).Hash
+          "$hachage  ForceSismiqueRPS2011.exe" | Out-File -Encoding ascii dist/SHA256SUMS.txt
+          Get-Content dist/SHA256SUMS.txt
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ForceSismiqueRPS2011-windows
+          path: |
+            dist/ForceSismiqueRPS2011.exe
+            dist/SHA256SUMS.txt
+          if-no-files-found: error
+
+      - name: Publier la Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v3
+        with:
+          generate_release_notes: true
+          files: |
+            dist/ForceSismiqueRPS2011.exe
+            dist/SHA256SUMS.txt
