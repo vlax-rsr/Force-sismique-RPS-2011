@@ -21,7 +21,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from affichage import rendre_bilan
+from affichage import rendre_note
 from rps import calcul_force_sismique, creer_localisation
 
 from .journal import Alerte, creer_journal
@@ -192,7 +192,7 @@ class FenetrePrincipale(QWidget):
             self._refus(str(erreur))
             return
 
-        self._note = self._horodate(rendre_bilan(resultats, localisation, geometrie, batiment, poids))
+        self._note = rendre_note(resultats, localisation, geometrie, batiment, poids)
         self.resultats.afficher(resultats, poids)
         self.bouton_exporter.setEnabled(True)
         self.journal.info(
@@ -201,16 +201,6 @@ class FenetrePrincipale(QWidget):
             resultats.Fy.valeur, resultats.Fy.unite.value,
         )
         self._dire(MESSAGE_SUCCES, "succes")
-
-    @staticmethod
-    def _horodate(note: str) -> str:
-        """Inscrit la date et l'heure du calcul sous le bandeau de la note."""
-        lignes = note.split("\n")
-        for index, ligne in enumerate(lignes[1:], start=1):
-            if ligne and set(ligne) <= {"="}:
-                horodatage = f"Calcul réalisé le {datetime.now():%d/%m/%Y à %H:%M:%S}"
-                return "\n".join([*lignes[: index + 1], horodatage, "", *lignes[index + 1:]])
-        return note
 
     def afficher_note(self) -> None:
         """Ouvre la note de calcul dans une fenêtre dédiée."""

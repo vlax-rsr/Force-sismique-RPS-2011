@@ -1,6 +1,6 @@
 """Affichage du bilan de calcul : en-tête, données d'entrée, paramètres RPS, résultats."""
 
-import sys
+from datetime import datetime
 from enum import Enum
 
 from rps import (
@@ -159,10 +159,42 @@ def afficher_bilan(
     print(rendre_bilan(resultats, localisation, geometrie, batiment, poids_sismique))
 
 
-if __name__ == "__main__":
-    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+def horodater(note: str, moment: datetime | None = None) -> str:
+    """Inscrit la date et l'heure du calcul sous le bandeau de la note."""
+    maintenant = moment or datetime.now()
+    lignes = note.split("\n")
+    for index, ligne in enumerate(lignes[1:], start=1):
+        if ligne and set(ligne) <= {"="}:
+            horodatage = f"Calcul réalisé le {maintenant:%d/%m/%Y à %H:%M:%S}"
+            return "\n".join([*lignes[: index + 1], horodatage, "", *lignes[index + 1:]])
+    return note
 
-    from main import executer, exemple
 
-    entree = exemple()
-    afficher_bilan(executer(*entree), *entree)
+def rendre_note(
+    resultats: Resultats,
+    localisation: ZoneSismique,
+    geometrie: Geometrie,
+    batiment: Batiment,
+    poids_sismique: PoidsSismiques,
+    moment: datetime | None = None,
+) -> str:
+    """Note de calcul : le bilan horodaté, exactement tel qu'il est enregistré.
+
+    C'est la source unique du texte de la note : l'interface l'affiche et
+    l'exporte, la ligne de commande l'imprime.
+    """
+    return horodater(
+        rendre_bilan(resultats, localisation, geometrie, batiment, poids_sismique),
+        moment,
+    )
+
+
+def afficher_note(
+    resultats: Resultats,
+    localisation: ZoneSismique,
+    geometrie: Geometrie,
+    batiment: Batiment,
+    poids_sismique: PoidsSismiques,
+    moment: datetime | None = None,
+) -> None:
+    print(rendre_note(resultats, localisation, geometrie, batiment, poids_sismique, moment))

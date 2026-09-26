@@ -1,16 +1,26 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "force-sismique"
 version = "1.0.0"
-description = "Calcul de la force sismique équivalente selon la RPS 2011 (Algérie)"
+description = "Calcul de la force sismique équivalente selon la RPS 2011 (Règlement Parasismique Marocain)"
 readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"
 license-files = ["LICENSE"]
-keywords = ["rps", "sismique", "parasismique", "structure", "genie-civil"]
+keywords = [
+    "rps",
+    "rps-2011",
+    "sismique",
+    "parasismique",
+    "force-sismique",
+    "maroc",
+    "structure",
+    "genie-civil",
+    "beton-arme",
+]
 authors = [{ name = "rianastellia" }]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -29,13 +39,14 @@ dependencies = []
 gui = ["PySide6>=6.6"]
 latex = ["matplotlib>=3.7"]
 dev = ["pytest>=8", "pyflakes"]
+build = ["pyinstaller>=6.10"]
 
 [project.scripts]
-force-sismique-gui = "lancer_interface:main"
+main = "lancer:main"
 
 [tool.setuptools]
 packages = ["rps", "interface"]
-py-modules = ["affichage", "main", "lancer_interface"]
+py-modules = ["affichage", "lancer", "exemple"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -1,8 +1,11 @@
-"""Point d'entrée : lance la procédure de calcul et affiche le bilan."""
+"""Jeu de données d'exemple et procédure de calcul associée.
 
-import sys
+Ce module ne fait que construire un jeu d'entrée cohérent (`exemple()`), appeler
+la procédure du domaine (`executer()`) et renvoyer le résultat. Il ne contient
+aucun point d'entrée : le rendu terminal est produit par `lancer.py demo`, via
+`affichage.afficher_note()`.
+"""
 
-from affichage import afficher_bilan
 from rps import (
     Batiment,
     ClasseConstruction,
@@ -47,10 +50,3 @@ def exemple() -> tuple[ZoneSismique, Geometrie, Batiment, PoidsSismiques]:
         Wy=saisir_charge("Poids sismique Y", symbole="Wy", unite=Unite.kN, valeur=3111.61),
     )
     return localisation, geometrie, batiment, poids_sismique
-
-
-if __name__ == "__main__":
-    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-
-    entree = exemple()
-    afficher_bilan(executer(*entree), *entree)
