@@ -37,6 +37,7 @@ logs/
 # Documents et scripts personnels, jamais publiés
 prive/
 README_old.md
+/generer_apercu.py
 
 # Système
 .DS_Store
