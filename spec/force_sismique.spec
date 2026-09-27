@@ -17,7 +17,7 @@ Ni `matplotlib` ni les modules Qt inutilisés ne sont inclus : voir
 from pathlib import Path
 
 RACINE = Path(SPECPATH).resolve().parent
-VERSION = "1.0.0"
+VERSION = "0.1.1"
 NOM = "ForceSismiqueRPS2011"
 
 # Modules présents dans l'environnement mais absents de l'application : les

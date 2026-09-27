@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "force-sismique"
-version = "1.0.0"
+version = "0.1.1"
 description = "Calcul de la force sismique équivalente selon la RPS 2011 (Règlement Parasismique Marocain)"
 readme = "README.md"
 requires-python = ">=3.12"
