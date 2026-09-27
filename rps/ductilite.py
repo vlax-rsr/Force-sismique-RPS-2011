@@ -44,7 +44,7 @@ def niveau_ductilite(
 
     return Params(
         nom="Niveau de ductilité",
-        symbole=nd.value,
+        symbole="ND",
         valeur=nd,
         unite="-",
         description="Niveau de ductilité en fonction de la classe de construction et du coefficient de vitesse",
